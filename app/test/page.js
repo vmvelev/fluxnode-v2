@@ -129,20 +129,20 @@ export default async function Test() {
   const currentHeight = data.daemonInfo.data.blocks
   return (
     <div>
-      <h1>{uniqueAddresses}</h1>
-      <h1>{runningApps.presearch}</h1>
-      <h1>{runningApps.streamr}</h1>
-      <h1>{runningApps.total}</h1>
-      <h1>{wordpressCount}</h1>
-      <h1>{nodesCount.cumulus}</h1>
-      <h1>{nodesCount.nimbus}</h1>
-      <h1>{nodesCount.stratus}</h1>
-      <h1>{utilizedNodes}</h1>
-      <h1>{utilizedNodesPercentage}</h1>
-      <h1>{utilizedResources.utilizedCPU}</h1>
-      <h1>{utilizedResources.utilizedRAM}</h1>
-      <h1>{utilizedResources.utilizedStorage}</h1>
-      <h1>{currentHeight}</h1>
+      <h1>Unique addresses - {uniqueAddresses}</h1>
+      <h1>Presearch nodes - {runningApps.presearch}</h1>
+      <h1>Streamr nodes - {runningApps.streamr}</h1>
+      <h1>Total running - {runningApps.total}</h1>
+      <h1>Wordpress - {wordpressCount}</h1>
+      <h1>Cumulus nodes - {nodesCount.cumulus}</h1>
+      <h1>Nimbus nodes - {nodesCount.nimbus}</h1>
+      <h1>Stratus nodes - {nodesCount.stratus}</h1>
+      <h1>Utilized nodes {utilizedNodes}</h1>
+      <h1>Percentage utilized nodes - {utilizedNodesPercentage}</h1>
+      <h1>Utilized CPUs - {utilizedResources.utilizedCPU}</h1>
+      <h1>Utilizied RAM - {utilizedResources.utilizedRAM} TB</h1>
+      <h1>Utilized Storage - {utilizedResources.utilizedStorage} TB</h1>
+      <h1>Current block height - {currentHeight}</h1>
     </div>
   );
 }
