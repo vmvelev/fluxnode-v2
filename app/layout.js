@@ -22,9 +22,9 @@ export default function RootLayout({ children }) {
                 </Link>
               </div>
               <div className='text-center'>
-                <Link className="hover:text-sky-500" href="/">Home</Link>
-                <Link className="mx-4 hover:text-sky-500" href="/nodes">Nodes</Link>
-                <Link className="hover:text-sky-500" href="/guides">Guides</Link>
+                <Link className="text-2xl hover:text-sky-500" href="/">Home</Link>
+                <Link className="text-2xl mx-4 hover:text-sky-500" href="/nodes">Nodes</Link>
+                <Link className="text-2xl hover:text-sky-500" href="/guides">Guides</Link>
               </div>
             </div>
           </nav>
@@ -35,32 +35,39 @@ export default function RootLayout({ children }) {
           </main>
           <footer className="bg-gray-900 w-full">
             <div className='grid grid-cols-3 w-full px-10 py-4'>
-              <div>
-                <h1 className="text-xl mb-3 font-bold">Follow us</h1>
+              <div className='grid'>
+                <h1 className="text-xl mb-2 font-bold">Follow us</h1>
                 <div className='flex'>
-                  <div className=''>
-                    <Link href="https://twitter.com/fluxprotocol" target='_blank'>
-                      <svg className='fill-sky-500 hover:fill-sky-300' width={50} height={50}>
-                        <path d="M11 4c-3.854 0-7 3.146-7 7v28c0 3.854 3.146 7 7 7h28c3.854 0 7-3.146 7-7V11c0-3.854-3.146-7-7-7H11zm0 2h28c2.774 0 5 2.226 5 5v28c0 2.774-2.226 5-5 5H11c-2.774 0-5-2.226-5-5V11c0-2.774 2.226-5 5-5zm2.086 7 9.223 13.104L13 37h2.5l7.938-9.293L29.977 37h7.937L27.79 22.613 36 13h-2.5l-6.84 8.01L21.023 13h-7.937zm3.828 2h3.065l14.107 20H31.02L16.914 15z" />
-                      </svg>
-                    </Link>
-                  </div>
-                  <Link href="https://discord.gg/8zYbQ3r" target='_blank'>
-                    <svg className='fill-sky-500 hover:fill-sky-300' width={50} height={50}>
-                      <path d="M24.402 9c-6.601 0-12.8.5-16.101 1.2-2.2.5-4.102 2-4.5 4.3C3.402 16.898 3 20.5 3 25s.398 8 .898 10.5c.403 2.2 2.301 3.8 4.5 4.3 3.504.7 9.5 1.2 16.102 1.2s12.598-.5 16.098-1.2c2.203-.5 4.101-2 4.5-4.3.402-2.5.902-6.098 1-10.598 0-4.5-.5-8.101-1-10.601-.399-2.2-2.297-3.801-4.5-4.301-3.5-.5-9.598-1-16.196-1Zm0 2c7.2 0 12.996.598 15.797 1.098 1.5.402 2.7 1.402 2.899 2.703.601 3.199 1 6.601 1 10.101C44 29.2 43.5 32.7 43.098 35.2c-.297 1.899-2.297 2.5-2.899 2.703-3.601.7-9.601 1.196-15.601 1.196S12.5 38.699 9 37.902C7.5 37.5 6.3 36.5 6.102 35.2 5.3 32.4 5 28.7 5 25c0-4.602.402-8 .8-10.098C6.103 13 8.2 12.398 8.7 12.2 12 11.5 18.101 11 24.401 11ZM19 17v16l14-8Zm2 3.402L29 25l-8 4.598Z" />
-                    </svg>
+                  <Link href="https://twitter.com/2ndTLMining" target='_blank'>
+                    <div className="bg-[url('./socialIcons/twitter-white.png')] hover:bg-[url('./socialIcons/twitter-sky.png')] bg-cover h-10 w-10">
+                    </div>
                   </Link>
-                  <Link href="abv.bg" target='_blank'>
-                    <svg className='fill-sky-500 hover:fill-sky-300' width={50} height={50}>
-                      <path d="M0 25v18h50V7H0v18zm48-14.7C48 11.6 26.7 29 25.1 29 23.5 29 2.5 12 2.2 10.4 1.9 9.2 5.4 9 24.9 9 43.1 9 48 9.3 48 10.3zM25 32c.3 0 5.6-4.1 11.8-9L48 13.9V41H2V13.9L13.2 23c6.2 4.9 11.5 9 11.8 9z" />
-                    </svg>
+                  <Link href="https://www.youtube.com/channel/UCO-gfYYQL22oibzOjr1SnHA" target='_blank'>
+                    <div className="bg-[url('./socialIcons/youtube-white.png')] hover:bg-[url('./socialIcons/youtube-sky.png')] bg-cover ml-1 h-10 w-10">
+                    </div>
+                  </Link>
+                  <Link href="mailto:2ndtlmining@gmail.com" target='_blank'>
+                    <div className="bg-[url('./socialIcons/email-white.png')] hover:bg-[url('./socialIcons/email-sky.png')] bg-cover ml-1 h-10 w-10">
+                    </div>
+                  </Link>
+                  <Link href="https://github.com/2ndtlmining/Fluxnode" target='_blank'>
+                    <div className="bg-[url('./socialIcons/github-white.png')] hover:bg-[url('./socialIcons/github-sky.png')] bg-cover ml-1 h-10 w-10">
+                    </div>
                   </Link>
                 </div>
+              </div>
+              <div className='grid text-center place-items-center'>
+                <h1 className='text-md'>Donations are very much appreciated!</h1>
+                <h1 className='text-md'>Please consider donating to keep the website development going.</h1>
+              </div>
+              <div className='text-center mt-3'>
+                <h1 className='text-md'>Flux address: t1ebxupkNYVQiswfwi7xBTwwKtioJqwLmUG</h1>
+                <h1 className='text-md'>BTC Address: 1MjMuVLEaAd8HJd3mh94L8qQe4cE6tH87V</h1>
               </div>
             </div>
           </footer>
         </div>
-      </body >
-    </html >
+      </body>
+    </html>
   )
 }
