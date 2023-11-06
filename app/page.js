@@ -149,7 +149,7 @@
 
 export default function Home() {
   return (
-    <div>
+    <div className="text-center">
       <h1>Home</h1>
       <h1>Home</h1>
       <h1>Home</h1>
@@ -176,6 +176,7 @@ export default function Home() {
       <h1>Home</h1>
       <h1>Home</h1>
       <h1>Home</h1>
+      {/* <h1>Home</h1>
       <h1>Home</h1>
       <h1>Home</h1>
       <h1>Home</h1>
@@ -205,29 +206,7 @@ export default function Home() {
       <h1>Home</h1>
       <h1>Home</h1>
       <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
-      <h1>Home</h1>
+      <h1>Home</h1> */}
     </div>
   )
 }
