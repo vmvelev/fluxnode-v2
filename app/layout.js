@@ -14,11 +14,11 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={inter.className}>
         <div className='flex flex-col min-h-screen'>
-          <nav className="sticky top-0 z-50 bg-gray-900 text-white w-screen border-b-2 border-[#464849]">
+          <nav className="sticky top-0 z-50 bg-gray-900 text-white w-screen">
             <div className='grid grid-cols-3 w-full px-6 py-4 items-center'>
               <div>
                 <Link className="text-3xl font-bold font-heading" href="/">
-                  <Image className="h-9" src={FluxLogo} alt="logo" />
+                  <Image className="w-1/4" src={FluxLogo} alt="logo" />
                 </Link>
               </div>
               <div className='text-center'>
