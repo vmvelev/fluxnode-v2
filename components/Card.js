@@ -3,7 +3,7 @@ import React from 'react';
 
 const Card = (props) => {
   return (
-    <div className={`grid h-20 rounded-md bg-gray-900 text-$white w-full`}>
+    <div className={'grid h-20 rounded-md bg-gray-900 text-white w-full'}>
       <div className='grid grid-cols-2 items-center'>
         <div className="grid justify-center">
           <Image
