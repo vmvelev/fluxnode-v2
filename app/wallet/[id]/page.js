@@ -7,6 +7,8 @@ import CountDownTimer from '@/components/CountdownTimer';
 import WalletCard from '@/components/WalletCard';
 import { Duration } from 'luxon';
 
+export const revalidate = 600;
+
 async function fetchData(url) {
   const response = await fetch(url);
   if (!response.ok) {
@@ -143,6 +145,17 @@ export default async function Wallet({ params }) {
             nextToValue="apps"
             ip={bestUptimeAndMostHosted.mostHosted.node.ip}
           />
+        </div>
+      </div>
+      <div className='mt-3 grid grid-cols-3 justify-items-center'>
+        <div className='grid grid-cols-6 w-full bg-gray-900 py-2 rounded-md'>
+          <h1 className='col-span-4 text-center text-sky-500 text-xl'>Estimated Earnings</h1>
+          <button className='text-white hover:bg-sky-500 rounded-md border border-sky-500 mx-2'>
+            Daily
+          </button>
+          <button className='text-white hover:bg-sky-500 rounded-md border border-sky-500 mx-2'>
+            USD
+          </button>
         </div>
       </div>
     </>
