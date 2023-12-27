@@ -6,6 +6,7 @@ import OtherWalletIcon from '../../nodeIcons/other-wallet-sky.png';
 import CountDownTimer from '@/components/CountdownTimer';
 import WalletCard from '@/components/WalletCard';
 import { Duration } from 'luxon';
+import EarningColumn from '@/components/EarningColumn';
 
 export const revalidate = 600;
 
@@ -19,18 +20,21 @@ async function fetchData(url) {
 
 async function getData(wallet) {
   const urls = [
+    'https://api.runonflux.io/daemon/getzelnodecount',
     `https://explorer.runonflux.io/api/addr/${wallet}?noTxList=1`,
     'https://explorer.runonflux.io/api/currency',
     `https://api.runonflux.io/daemon/viewdeterministiczelnodelist?filter=${wallet}`
   ];
 
   const [
+    allNodesResponse,
     walletInfoResponse,
     fluxCurrenyResponse,
     nodesResponse
   ] = await Promise.all(urls.map(fetchData));
 
   return {
+    allNodesCount: allNodesResponse.data,
     walletInfo: walletInfoResponse,
     fluxCurreny: fluxCurrenyResponse.data,
     nodes: nodesResponse.data
@@ -92,8 +96,48 @@ async function getNextPayout(nodes) {
   return nextPayoutResponse;
 }
 
+function calculateRewards(nodes, allNodes) {
+  let dailyTotal = 0;
+  let monthlyTotal = 0;
+
+  console.log(allNodes);
+
+  nodes.forEach(node => {
+    if (node.tier === 'CUMULUS') {
+      const cycleDurationDays = (allNodes['cumulus-enabled'] * 2) / 60 / 24;
+      const rewardPerCycle = 2.8125;
+      const dailyReward = rewardPerCycle / cycleDurationDays;
+      const monthlyReward = dailyReward * 30;
+
+      dailyTotal += dailyReward;
+      monthlyTotal += monthlyReward;
+    } else if (node.tier === 'NIMBUS') {
+      const cycleDurationDays = (allNodes['nimbus-enabled'] * 2) / 60 / 24;
+      const rewardPerCycle = 4.6875;
+      const dailyReward = rewardPerCycle / cycleDurationDays;
+      const monthlyReward = dailyReward * 30;
+
+      dailyTotal += dailyReward;
+      monthlyTotal += monthlyReward;
+    } else if (node.tier === 'STRATUS') {
+      const cycleDurationDays = (allNodes['stratus-enabled'] * 2) / 60 / 24;
+      const rewardPerCycle = 11.25;
+      const dailyReward = rewardPerCycle / cycleDurationDays;
+      const monthlyReward = dailyReward * 30;
+
+      dailyTotal += dailyReward;
+      monthlyTotal += monthlyReward;
+    }
+  });
+
+  return { dailyTotal, monthlyTotal };
+}
+
 export default async function Wallet({ params }) {
   const data = await getData(params.id);
+  const nodes = data.nodes;
+  const allNodesCount = data.allNodesCount;
+  const { dailyTotal, monthlyTotal } = calculateRewards(nodes, allNodesCount);
   const fluxPrice = data.fluxCurreny.rate;
   const walletBalance = data.walletInfo.balance;
   const walletBalanceUSD = new BigNumber(walletBalance).multipliedBy(new BigNumber(fluxPrice)).toFixed(2);
@@ -147,15 +191,11 @@ export default async function Wallet({ params }) {
           />
         </div>
       </div>
-      <div className='mt-3 grid grid-cols-3 justify-items-center'>
-        <div className='grid grid-cols-6 w-full bg-gray-900 py-2 rounded-md'>
-          <h1 className='col-span-4 text-center text-sky-500 text-xl'>Estimated Earnings</h1>
-          <button className='text-white hover:bg-sky-500 rounded-md border border-sky-500 mx-2'>
-            Daily
-          </button>
-          <button className='text-white hover:bg-sky-500 rounded-md border border-sky-500 mx-2'>
-            USD
-          </button>
+      <div className='mt-5 grid justify-items-center'>
+        <div className='grid w-4/5 grid-cols-3 gap-4 justify-items-center'>
+          <EarningColumn
+            availableNodes={nodes}
+          />
         </div>
       </div>
     </>
