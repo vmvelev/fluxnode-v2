@@ -4,11 +4,6 @@ import { useMemo, useState } from 'react';
 import EarningsCard from './EarningsCard';
 
 const EarningColumn = ({ availableNodes, dailyTotal, monthlyTotal, fluxPrice, tierRewards }) => {
-  console.log("Available nodes: ", availableNodes);
-  console.log("Daily total: ", dailyTotal);
-  console.log("Monthly total: ", monthlyTotal);
-  console.log("Flux price: ", fluxPrice)
-  console.log("Tier rewards: ", tierRewards)
   const [currencyMode, setCurrencyMode] = useState('USD');
   const [dailyMode, setDailyMode] = useState("Daily");
 
@@ -74,7 +69,7 @@ const EarningColumn = ({ availableNodes, dailyTotal, monthlyTotal, fluxPrice, ti
   };
 
   return (
-    <div className='space-y-2'>
+    <div className='space-y-2 bg-gray-900 p-5 rounded-md'>
       <h1 className='col-span-4 text-center text-sky-500 text-xl'>Estimated Earnings</h1>
       <div className="mb-2 flex items-center justify-center w-full gap-5">
         <button
