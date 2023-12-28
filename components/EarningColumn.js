@@ -1,9 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import EarningsCard from './EarningsCard';
 
-const EarningColumn = ({ availableNodes }) => {
+const EarningColumn = ({ availableNodes, dailyTotal, monthlyTotal, fluxPrice, tierRewards }) => {
+  console.log("Available nodes: ", availableNodes);
+  console.log("Daily total: ", dailyTotal);
+  console.log("Monthly total: ", monthlyTotal);
+  console.log("Flux price: ", fluxPrice)
+  console.log("Tier rewards: ", tierRewards)
   const [currencyMode, setCurrencyMode] = useState('USD');
   const [dailyMode, setDailyMode] = useState("Daily");
 
@@ -15,7 +20,58 @@ const EarningColumn = ({ availableNodes }) => {
     setDailyMode(dailyMode === 'Daily' ? 'Monthly' : 'Daily');
   };
 
-  console.log(availableNodes);
+  const nodeCounts = useMemo(() => {
+    return availableNodes.reduce((acc, node) => {
+      const tier = node.tier.toLowerCase();
+      acc[tier] = (acc[tier] || 0) + 1;
+      return acc;
+    }, {});
+  }, [availableNodes]);
+
+  const renderEarningsCards = () => {
+    const earningsInCurrentCurrency = (earnings) => {
+      if (currencyMode === 'FLUX') {
+        return (parseFloat(earnings) / parseFloat(fluxPrice)).toFixed(2);
+      }
+      return parseFloat(earnings).toFixed(2);
+    };
+
+    return Object.entries(nodeCounts).map(([tier, count]) => {
+      const tierEarnings = tierRewards[tier];
+      const earnings = dailyMode === 'Daily' ? tierEarnings.daily : tierEarnings.monthly;
+
+      let bgColor, iconClass;
+      switch (tier) {
+        case 'cumulus':
+          bgColor = 'bg-blue-600';
+          iconClass = 'fas fa-bolt';
+          break;
+        case 'nimbus':
+          bgColor = 'bg-yellow-600';
+          iconClass = 'fas fa-cloud';
+          break;
+        case 'stratus':
+          bgColor = 'bg-red-600';
+          iconClass = 'fas fa-fire';
+          break;
+        default:
+          bgColor = 'bg-gray-600';
+          iconClass = 'fas fa-question';
+      }
+
+      return (
+        <EarningsCard
+          key={tier}
+          iconClass={iconClass}
+          bgColor={bgColor}
+          nodeType={tier.charAt(0).toUpperCase() + tier.slice(1)}
+          earnings={earningsInCurrentCurrency(earnings)}
+          nodeCount={count.toString()}
+          currencyMode={currencyMode}
+        />
+      );
+    });
+  };
 
   return (
     <div className='space-y-2'>
@@ -33,22 +89,7 @@ const EarningColumn = ({ availableNodes }) => {
           {currencyMode}
         </button>
       </div>
-      <EarningsCard
-        iconClass="fas fa-bolt"
-        bgColor="bg-blue-600"
-        nodeType="Cumulus"
-        earnings="0.89"
-        nodeCount="3"
-        currencyMode={currencyMode}
-      />
-      <EarningsCard
-        iconClass="fas fa-cloud"
-        bgColor="bg-yellow-600"
-        nodeType="Nimbus"
-        earnings="0"
-        nodeCount="0"
-        currencyMode={currencyMode}
-      />
+      {renderEarningsCards()}
     </div>
   );
 };

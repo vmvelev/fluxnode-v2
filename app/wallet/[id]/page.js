@@ -8,9 +8,12 @@ import WalletCard from '@/components/WalletCard';
 import { Duration } from 'luxon';
 import EarningColumn from '@/components/EarningColumn';
 
+const FLUX_API_BASE = 'https://api.runonflux.io';
+const EXPLORER_API_BASE = 'https://explorer.runonflux.io/api';
+const NODE_API_BASE = 'https://fluxnode.app.runonflux.io/api/v1';
 export const revalidate = 600;
 
-async function fetchData(url) {
+async function fetchJSON(url) {
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to fetch: ${url}, status: ${response.status}`);
@@ -20,133 +23,102 @@ async function fetchData(url) {
 
 async function getData(wallet) {
   const urls = [
-    'https://api.runonflux.io/daemon/getzelnodecount',
-    `https://explorer.runonflux.io/api/addr/${wallet}?noTxList=1`,
-    'https://explorer.runonflux.io/api/currency',
-    `https://api.runonflux.io/daemon/viewdeterministiczelnodelist?filter=${wallet}`
+    `${FLUX_API_BASE}/daemon/getzelnodecount`,
+    `${EXPLORER_API_BASE}/addr/${wallet}?noTxList=1`,
+    `${EXPLORER_API_BASE}/currency`,
+    `${FLUX_API_BASE}/daemon/viewdeterministiczelnodelist?filter=${wallet}`
   ];
 
-  const [
-    allNodesResponse,
-    walletInfoResponse,
-    fluxCurrenyResponse,
-    nodesResponse
-  ] = await Promise.all(urls.map(fetchData));
+  const responses = await Promise.all(urls.map(fetchJSON));
+  const [allNodesResponse, walletInfoResponse, fluxCurrenyResponse, nodesResponse] = responses;
 
   return {
     allNodesCount: allNodesResponse.data,
     walletInfo: walletInfoResponse,
     fluxCurreny: fluxCurrenyResponse.data,
     nodes: nodesResponse.data
-  }
+  };
 }
 
 async function getBestUptimeNodeAndMostHosted(nodes) {
-  const fetchPromises = nodes.map(node => {
-    let url = `https://fluxnode.app.runonflux.io/api/v1/node-single/${node.ip}`;
-    if (!node.ip.includes(":")) {
-      url = `https://fluxnode.app.runonflux.io/api/v1/node-single/${node.ip}:16127`;
-    }
-    return fetch(url);
-  });
+  const data = await Promise.all(nodes.map(async node => {
+    const url = `${NODE_API_BASE}/node-single/${node.ip.includes(":") ? node.ip : `${node.ip}:16127`}`;
+    return fetchJSON(url);
+  }));
 
-  const responses = await Promise.all(fetchPromises);
-  const jsonPromises = responses.map(response => response.json());
-  const data = await Promise.all(jsonPromises);
-
-  let res = {
-    bestUptime: {
-      uptimeSeconds: 0,
-      node: null
-    },
-    mostHosted: {
-      apps: 0,
-      node: null
-    }
-  };
+  let bestUptime = { uptimeSeconds: 0, node: null };
+  let mostHosted = { apps: 0, node: null };
 
   data.forEach((nodeData, index) => {
-    if (nodeData.node.results.uptime.data > res.bestUptime.uptimeSeconds) {
-      res.bestUptime.uptimeSeconds = nodeData.node.results.uptime.data;
-      res.bestUptime.node = nodes[index];
-    }
+    const uptime = nodeData.node.results.uptime.data;
     const apps = nodeData.node.results.apps.data.length;
-    if (apps > res.mostHosted.apps) {
-      res.mostHosted.apps = apps;
-      res.mostHosted.node = nodes[index];
+
+    if (uptime > bestUptime.uptimeSeconds) {
+      bestUptime = { uptimeSeconds: uptime, node: nodes[index] };
+    }
+    if (apps > mostHosted.apps) {
+      mostHosted = { apps, node: nodes[index] };
     }
   });
 
-  return res;
+  return { bestUptime, mostHosted };
 }
 
 async function getNextPayout(nodes) {
-  const nextPayoutResponse = {
-    nextPayout: 0,
-    node: null
-  }
-  for (const node of nodes) {
-    const currentRank = node.rank;
-    const nextPayout = currentRank * 2;
-    if (nextPayout < nextPayoutResponse.nextPayout || nextPayoutResponse.nextPayout === 0) {
-      nextPayoutResponse.nextPayout = nextPayout;
-      nextPayoutResponse.node = node;
-    }
-  }
-  return nextPayoutResponse;
+  const nextPayout = nodes.reduce((acc, node) => {
+    const payout = node.rank * 2;
+    return payout < acc.nextPayout || acc.nextPayout === 0 ? { nextPayout: payout, node } : acc;
+  }, { nextPayout: 0, node: null });
+
+  return nextPayout;
 }
 
 function calculateRewards(nodes, allNodes) {
-  let dailyTotal = 0;
-  let monthlyTotal = 0;
+  const blockReward = 37.5;
+  let totalRewards = { dailyTotal: 0, monthlyTotal: 0 };
+  let tierRewards = { cumulus: { daily: 0, monthly: 0 }, nimbus: { daily: 0, monthly: 0 }, stratus: { daily: 0, monthly: 0 } };
 
-  console.log(allNodes);
+  const rewardCalculation = (tierEnabled, tierPercentage) => {
+    const cycleDurationDays = (allNodes[tierEnabled] * 2) / 60 / 24;
+    const rewardPerCycle = blockReward * tierPercentage;
+    const dailyReward = rewardPerCycle / cycleDurationDays;
+    return dailyReward * 30; // Monthly reward
+  };
 
   nodes.forEach(node => {
-    if (node.tier === 'CUMULUS') {
-      const cycleDurationDays = (allNodes['cumulus-enabled'] * 2) / 60 / 24;
-      const rewardPerCycle = 2.8125;
-      const dailyReward = rewardPerCycle / cycleDurationDays;
-      const monthlyReward = dailyReward * 30;
+    let monthlyReward = 0;
+    if (node.tier === 'CUMULUS') monthlyReward = rewardCalculation('cumulus-enabled', 0.075);
+    else if (node.tier === 'NIMBUS') monthlyReward = rewardCalculation('nimbus-enabled', 0.125);
+    else if (node.tier === 'STRATUS') monthlyReward = rewardCalculation('stratus-enabled', 0.3);
 
-      dailyTotal += dailyReward;
-      monthlyTotal += monthlyReward;
-    } else if (node.tier === 'NIMBUS') {
-      const cycleDurationDays = (allNodes['nimbus-enabled'] * 2) / 60 / 24;
-      const rewardPerCycle = 4.6875;
-      const dailyReward = rewardPerCycle / cycleDurationDays;
-      const monthlyReward = dailyReward * 30;
+    const dailyReward = monthlyReward / 30;
+    totalRewards.dailyTotal += dailyReward;
+    totalRewards.monthlyTotal += monthlyReward;
 
-      dailyTotal += dailyReward;
-      monthlyTotal += monthlyReward;
-    } else if (node.tier === 'STRATUS') {
-      const cycleDurationDays = (allNodes['stratus-enabled'] * 2) / 60 / 24;
-      const rewardPerCycle = 11.25;
-      const dailyReward = rewardPerCycle / cycleDurationDays;
-      const monthlyReward = dailyReward * 30;
-
-      dailyTotal += dailyReward;
-      monthlyTotal += monthlyReward;
-    }
+    const tierKey = node.tier.toLowerCase();
+    tierRewards[tierKey].daily += dailyReward;
+    tierRewards[tierKey].monthly += monthlyReward;
   });
 
-  return { dailyTotal, monthlyTotal };
+  return { totalRewards, tierRewards };
 }
 
 export default async function Wallet({ params }) {
   const data = await getData(params.id);
-  const nodes = data.nodes;
-  const allNodesCount = data.allNodesCount;
-  const { dailyTotal, monthlyTotal } = calculateRewards(nodes, allNodesCount);
+  const { totalRewards, tierRewards } = calculateRewards(data.nodes, data.allNodesCount);
   const fluxPrice = data.fluxCurreny.rate;
-  const walletBalance = data.walletInfo.balance;
-  const walletBalanceUSD = new BigNumber(walletBalance).multipliedBy(new BigNumber(fluxPrice)).toFixed(2);
+  const walletBalance = new BigNumber(data.walletInfo.balance);
+  const walletBalanceUSD = walletBalance.multipliedBy(new BigNumber(fluxPrice)).toFixed(2);
+
   const bestUptimeAndMostHosted = await getBestUptimeNodeAndMostHosted(data.nodes);
   const uptimeDuration = Duration.fromMillis(bestUptimeAndMostHosted.bestUptime.uptimeSeconds * 1000).shiftTo('days', 'hours', 'minutes', 'seconds');
-  const padWithZero = (number) => {
-    return number < 10 ? `0${number}` : number;
-  };
-  const uptimeInDays = `${padWithZero(uptimeDuration.days)}:${padWithZero(uptimeDuration.hours)}:${padWithZero(uptimeDuration.minutes)}:${padWithZero(uptimeDuration.seconds)}`;
+  const formatDurationPart = (value) => value < 10 ? `0${value}` : value.toString();
+  const days = formatDurationPart(uptimeDuration.days);
+  const hours = formatDurationPart(uptimeDuration.hours);
+  const minutes = formatDurationPart(uptimeDuration.minutes);
+  const seconds = formatDurationPart(uptimeDuration.seconds);
+  const uptimeInDays = `${days}:${hours}:${minutes}:${seconds}`;
+
   const nextPayout = await getNextPayout(data.nodes);
   return (
     <>
@@ -187,14 +159,18 @@ export default async function Wallet({ params }) {
             label="Most Hosted Node"
             value={bestUptimeAndMostHosted.mostHosted.apps}
             nextToValue="apps"
-            ip={bestUptimeAndMostHosted.mostHosted.node.ip}
+            ip={bestUptimeAndMostHosted.mostHosted?.node?.ip}
           />
         </div>
       </div>
       <div className='mt-5 grid justify-items-center'>
         <div className='grid w-4/5 grid-cols-3 gap-4 justify-items-center'>
           <EarningColumn
-            availableNodes={nodes}
+            availableNodes={data.nodes}
+            dailyTotal={totalRewards.dailyTotal}
+            monthlyTotal={totalRewards.monthlyTotal}
+            tierRewards={tierRewards}
+            fluxPrice={fluxPrice}
           />
         </div>
       </div>
