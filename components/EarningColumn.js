@@ -31,7 +31,7 @@ const EarningColumn = ({ availableNodes, dailyTotal, monthlyTotal, fluxPrice, ti
       return parseFloat(earnings).toFixed(2);
     };
 
-    return Object.entries(nodeCounts).map(([tier, count]) => {
+    const tierEarningsCards = Object.entries(nodeCounts).map(([tier, count]) => {
       const tierEarnings = tierRewards[tier];
       const earnings = dailyMode === 'Daily' ? tierEarnings.daily : tierEarnings.monthly;
 
@@ -66,6 +66,21 @@ const EarningColumn = ({ availableNodes, dailyTotal, monthlyTotal, fluxPrice, ti
         />
       );
     });
+
+    const pasEarnings = dailyMode === 'Daily' ? dailyTotal : monthlyTotal;
+    const pasCard = (
+      <EarningsCard
+        key="pas"
+        iconClass="fas fa-trophy" // Example icon, change as needed
+        bgColor="bg-green-600" // Example color, change as needed
+        nodeType="Parallel Assets"
+        earnings={earningsInCurrentCurrency(pasEarnings)}
+        assetCount="10" // Adjust if you have a different count for PAs
+        currencyMode={currencyMode}
+      />
+    );
+
+    return [...tierEarningsCards, pasCard];
   };
 
   return (
